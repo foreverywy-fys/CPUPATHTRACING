@@ -1,8 +1,22 @@
-# CPUPathTracing
+# CPU 端路径追踪渲染器
 
-CPU path tracing renderer built with C++ and CMake. Supports model loading, BVH acceleration, and multiple materials.
+这是一个基于 C++17 从零实现的纯 CPU 物理路径追踪渲染器，不依赖 OpenGL、DirectX 等现代图形 API。项目覆盖从相机成像、光线生成，到几何求交、材质采样、全局光照、模型加载、加速结构和交互式预览的完整渲染流程。
 
-## Build
+## 主要功能
+
+- 使用 GLM 实现透视投影、视角变换和光线生成，并通过 SFML 提供相机平移、旋转、缩放和实时预览。
+- 支持球体、平面、三角形等基础几何体，以及模型空间到世界空间的实例变换和法线变换。
+- 使用 RapidOBJ 解析 OBJ 模型，读取顶点法线并渲染高面数模型。
+- 提供 Bucket 和 SAH 两种 BVH 构建方式，采用线性化节点与显式栈遍历减少三角形求交开销。
+- 实现漫反射、电介质、导体、镜面反射和微表面材质，包含 GGX 分布、可见法线采样、菲涅耳反射与粗糙度控制。
+- 路径追踪支持多次反弹、俄罗斯轮盘终止和基于 BSDF 的重要性采样，计算直接光照与间接光照。
+- 使用线程池、分块并行和线程本地随机数生成器加速多采样渲染，并支持渐进式显示。
+- 提供法线、包围盒测试统计和三角形求交统计等调试渲染模式，便于分析渲染与 BVH 性能。
+- 将帧缓冲区以 P6 二进制格式导出为 PPM，并支持预览过程中的动态分辨率和实时渐进渲染。
+
+## 构建
+
+项目依赖以 Git 子模块形式提供，请递归克隆：
 
 ```powershell
 git clone --recurse-submodules https://github.com/foreverywy-fys/CPUPATHTRACING.git
@@ -10,10 +24,10 @@ cmake -S . -B build
 cmake --build build --config Release
 ```
 
-## Render Example
+## 渲染示例
 
-Render output from `material.ppm`:
+材质测试场景的渲染结果：
 
-![Material render](material.png)
+![材质测试场景](material.png)
 
-Original image: [material.ppm](material.ppm)
+原始 PPM 文件：[material.ppm](material.ppm)
