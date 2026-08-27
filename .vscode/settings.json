@@ -1,0 +1,12 @@
+{
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}"
+    ],
+    "clangd.fallbackFlags": [
+        "-std=c++17",
+        "-I${workspaceFolder}/source/include",
+        "-I${workspaceFolder}/thirdparty/glm",
+        "-I${workspaceFolder}/thirdparty/rapidobj/include",
+        "-I${workspaceFolder}/thirdparty/SFML/include"
+    ]
+}

@@ -1,0 +1,56 @@
+#include "material/conductor_material.hpp"
+#include <glm/glm.hpp>
+
+#include "until/complex.hpp"
+#include <cstddef>
+
+glm::vec3 Fresnel(const glm::vec3 &ior, const glm::vec3 &k, float cos_theta_i)
+{
+    glm::vec3 fr {};
+    for (size_t i = 0; i < 3; i++)
+    {
+        Complex etat_div_etai { ior[i], k[i] };
+        cos_theta_i = glm::clamp(cos_theta_i, 0.f, 1.f);
+        float sin2_theta_i = 1.f - cos_theta_i * cos_theta_i;
+        Complex sin2_theta_t = sin2_theta_i / (etat_div_etai * etat_div_etai);
+        Complex cos_theta_t = sqrt(1.f - sin2_theta_t);
+
+        Complex r_parl =
+            (etat_div_etai * cos_theta_i - cos_theta_t) /
+            (etat_div_etai * cos_theta_i + cos_theta_t);
+        Complex r_perp =
+            (cos_theta_i - etat_div_etai * cos_theta_t) /
+            (cos_theta_i + etat_div_etai * cos_theta_t);
+
+        const float para_norm = norm(r_parl);
+        const float perp_norm = norm(r_perp);
+        fr[i] = 0.5F *
+            (para_norm * para_norm + perp_norm * perp_norm);
+    }
+
+    return fr;
+}
+
+std::optional<BSDFSample> ConductorMaterial::sampleBSDF(const glm::vec3 &hit_point, const glm::vec3 &view_direction, const RNG &rng) const
+{
+    glm::vec3 microfacet_normal { 0, 1, 0 };
+    if (!microfacet_theory.isDeltaDistribution())
+    {
+        microfacet_normal = microfacet_theory.sampleVisibleNormal(view_direction, rng);
+    }
+    glm::vec3 fr = Fresnel(ior, k, glm::abs(glm::dot(view_direction, microfacet_normal)));
+    glm::vec3 light_direction = -view_direction + 2.0f * glm::dot(view_direction, microfacet_normal) * microfacet_normal;
+
+    if (microfacet_theory.isDeltaDistribution())
+    {
+        return BSDFSample
+        {
+            fr / glm::abs(light_direction.y),
+            1.f,
+            light_direction
+        };
+    }
+    glm::vec3 brdf = fr * microfacet_theory.normalDistribution(microfacet_normal) * microfacet_theory.heightCorrelatedMaskingShadowing(light_direction, view_direction, microfacet_normal) / glm::abs(4.f * light_direction.y * view_direction.y);
+    float pdf = microfacet_theory.visibleNormalDistribution(view_direction, microfacet_normal) / glm::abs(4.f * glm::dot(view_direction, microfacet_normal));
+    return BSDFSample { brdf, pdf, light_direction};
+}

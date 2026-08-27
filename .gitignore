@@ -1,0 +1,38 @@
+# CMake and local build trees
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+Makefile
+*.sln
+*.slnx
+*.vcxproj
+*.vcxproj.filters
+
+# Compiled binaries and toolchain output
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.obj
+*.o
+*.a
+*.tlog/
+
+# Generated renderer output and logs
+*.ppm
+*.log
+
+# IDE user-specific files
+.vs/
+.vscode/*.user
+.vscode/*.code-workspace
+
+# OS metadata
+.DS_Store
+Thumbs.db
